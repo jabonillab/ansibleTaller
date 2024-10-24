@@ -7,7 +7,6 @@
       ansible.builtin.dnf:
         name: "*"
         state: latest
-        register: yum_update
       notify:
         - Restart
 

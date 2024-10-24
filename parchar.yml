@@ -11,7 +11,7 @@
       notify:
         - Restart
 
- handlers:
+- handlers:
   - name: Restart
     ansible.builtin.reboot:
       msg: "Rebooting machine in 5 seconds"

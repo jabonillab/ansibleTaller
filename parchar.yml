@@ -2,6 +2,7 @@
 - name: Un playbook muy muy sencillo
   # A quienes se les va a operar 
   hosts: web1
+  become: yes
   tasks:
     - name: Upgrade all packages
       ansible.builtin.dnf:

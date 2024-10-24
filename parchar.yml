@@ -1,8 +1,17 @@
 ---
 - name: Un playbook muy muy sencillo
   # A quienes se les va a operar 
-  hosts: all
+  hosts: web1
   tasks:
-    - name: Dame un mensaje
-      ansible.builtin.debug:
-        msg: "Bienvenido al mundo de Ansible"
+    - name: Upgrade all packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+        register: yum_update
+      notify:
+        - Restart
+
+ handlers:
+  - name: Restart
+    ansible.builtin.reboot:
+      msg: "Rebooting machine in 5 seconds"

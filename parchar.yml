@@ -1,6 +1,6 @@
 ---
 - name: Un playbook muy muy sencillo
-  hosts: web1
+  hosts: web
   become: yes
   tasks:
     - name: Ensure SSH MaxStartups is configured

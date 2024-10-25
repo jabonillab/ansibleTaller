@@ -120,24 +120,6 @@
           regexp: ^\s*ProcessSizeMax\s*=\s*
           line: ProcessSizeMax=0
           state: present
-
-# Disable the user list shown on the login screen
-    # by setting the org.gnome.login-screen.disable-user-list GSettings key.
-    # When the user list is disabled, users need to type their user name and password at the prompt to log in.
-    - name: Disable the GNOME3 Login User List
-      ini_file:
-        # Path to the INI-style file
-        dest: /etc/dconf/db/gdm.d/00-security-settings
-        # Section name in INI file.
-        section: org/gnome/login-screen
-        # Matching section must contain this option.
-        option: disable-user-list
-        # Matching section_has_values[].option must have this specific value.
-        value: 'true'
-        # Do not insert spaces before and after ‘=’ symbol.
-        no_extra_spaces: true
-        # If set to false, the module will fail if the file does not already exist.
-        create: true
  
     - name: Prevent user modification of GNOME3 disablement of Login User List
       # This module ensures a particular line is in a file,
@@ -186,3 +168,34 @@
       package:
         name: xinetd
         state: absent
+
+
+    - name: Use Only Strong Key Exchange algorithms
+      block:
+      - name: Check for duplicate values
+        lineinfile:
+          path: /etc/ssh/sshd_config
+          create: true
+          regexp: (?i)^\s*KexAlgorithms\s+
+          state: absent
+        check_mode: true
+        changed_when: false
+        register: dupes
+      - name: Deduplicate values from /etc/ssh/sshd_config
+        lineinfile:
+          path: /etc/ssh/sshd_config
+          create: true
+          regexp: (?i)^\s*KexAlgorithms\s+
+          state: absent
+        when: dupes.found is defined and dupes.found > 1
+      - name: Insert correct line to /etc/ssh/sshd_config
+        lineinfile:
+          path: /etc/ssh/sshd_config
+          create: true
+          regexp: (?i)^\s*KexAlgorithms\s+
+          line: KexAlgorithms {{ sshd_strong_kex }}
+          state: present
+          insertbefore: BOF
+          validate: /usr/sbin/sshd -t -f %s
+      tags:
+      - CCE-86518-8
